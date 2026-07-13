@@ -670,10 +670,10 @@
     } else if(value === '直接受け取り'){
       pickupBlock.classList.add('open');
       document.getElementById('paymentDesc').innerHTML =
-        'お受け取り時に、<strong>その場での現金払い</strong>または<strong>振込</strong>のどちらかをお選びいただけます。<br>' +
+        'お受け取り時に<strong>その場で現金払い</strong>、または<strong>後日振込</strong>のどちらかをお選びいただけます。<br>' +
         '振込をご希望の場合は、その場で請求書をお渡しします。';
       document.getElementById('agreePaymentLabel').innerHTML =
-        'お支払いは現金またはその場でのご案内による振込であることを確認しました<span class="req">必須</span>';
+        'お支払いはその場での現金、または後日振込であることを確認しました<span class="req">必須</span>';
     }
     updatePriceDisplay();
   });
@@ -766,7 +766,7 @@
       riceAmount: riceAmount,
       shippingAmount: shippingAmount,
       totalAmount: totalAmount,
-      paymentMethod: (method === '配送') ? '現金振込(請求書同封)' : '現金またはその場振込',
+      paymentMethod: (method === '配送') ? '現金振込(請求書同封)' : 'その場で現金 または 後日振込',
       paymentAgreed: true,
       lineUserId: lineUserId
     };

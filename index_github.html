@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>お米ご注文フォーム</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Shippori+Mincho:wght@500;700&display=swap');
+
+  :root{
+    --rice-gold: #C9A227;
+    --rice-gold-deep: #9C7B1A;
+    --paddy-green: #3D5A3D;
+    --paddy-green-deep: #24391F;
+    --husk: #EDE6D3;
+    --ink: #2A2620;
+    --line: #D8CEB0;
+    --white: #FFFFFF;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  body{
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    background: var(--husk);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 0 0 60px;
+  }
+
+  .hero{
+    background: linear-gradient(160deg, var(--paddy-green-deep) 0%, var(--paddy-green) 65%);
+    color: var(--husk);
+    padding: 44px 24px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .eyebrow{
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--rice-gold);
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  h1{
+    font-family: 'Shippori Mincho', serif;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  .hero p{
+    margin-top: 10px;
+    font-size: 14px;
+    opacity: 0.85;
+    line-height: 1.7;
+  }
+
+  .card{
+    max-width: 520px;
+    margin: -30px auto 0;
+    background: var(--white);
+    border-radius: 18px;
+    box-shadow: 0 20px 40px rgba(36,57,31,0.15);
+    padding: 28px 22px 32px;
+    position: relative;
+  }
+
+  .field{ margin-bottom: 24px; }
+
+  label.field-label{
+    display:block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--paddy-green-deep);
+    margin-bottom: 8px;
+  }
+
+  label.field-label .req{
+    color: #B4472C;
+    margin-left: 4px;
+    font-size: 11px;
+  }
+
+  input[type="text"], textarea, select{
+    width: 100%;
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 15px;
+    font-family: inherit;
+    background: #FBFAF5;
+    color: var(--ink);
+  }
+
+  input[type="text"]:focus, textarea:focus, select:focus{
+    outline: none;
+    border-color: var(--rice-gold-deep);
+    background: var(--white);
+  }
+
+  textarea{ min-height: 90px; resize: vertical; }
+
+  .method-group{ display: flex; flex-direction: column; gap: 10px; }
+
+  .method-option{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    padding: 13px 14px;
+    cursor: pointer;
+    background: #FBFAF5;
+  }
+
+  .method-option.selected{
+    border-color: var(--paddy-green);
+    background: #F1F4EC;
+  }
+
+  .method-option input{ accent-color: var(--paddy-green); width: 17px; height: 17px; }
+  .method-option .m-title{ font-weight: 700; font-size: 14.5px; }
+  .method-option .m-desc{ font-size: 12px; color: #6B6455; margin-top: 2px; }
+
+  .conditional{ max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+  .conditional.open{ max-height: 500px; margin-top: 14px; }
+
+  .helper{ font-size: 12px; color: #8A7F63; margin-top: 6px; line-height: 1.5; }
+
+  .qty-row{ display: flex; align-items: center; gap: 14px; }
+
+  .qty-btn{
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 1.5px solid var(--paddy-green);
+    background: var(--white);
+    color: var(--paddy-green-deep);
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  .qty-display{
+    font-family: 'Shippori Mincho', serif;
+    font-size: 22px;
+    font-weight: 700;
+    min-width: 70px;
+    text-align: center;
+  }
+
+  .qty-unit{ font-size: 13px; color: #6B6455; }
+
+  .price-box{
+    background: #F1F4EC;
+    border: 1.5px solid var(--paddy-green);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+  }
+
+  .price-row{
+    display:flex;
+    justify-content: space-between;
+    font-size: 13.5px;
+    color: #4A4536;
+    padding: 4px 0;
+  }
+
+  .price-row.total{
+    border-top: 1px dashed var(--paddy-green);
+    margin-top: 8px;
+    padding-top: 10px;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--paddy-green-deep);
+  }
+
+  .price-note{
+    font-size: 11.5px;
+    color: #B4472C;
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
+  .submit-btn{
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    background: var(--paddy-green-deep);
+    color: var(--husk);
+    font-size: 15.5px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+
+  .submit-btn:disabled{ opacity: 0.6; cursor: not-allowed; }
+  .submit-btn:hover:not(:disabled){ background: var(--paddy-green); }
+
+  .divider{ height: 1px; background: var(--line); margin: 26px 0 22px; }
+
+  .result{
+    display:none;
+    max-width: 520px;
+    margin: 20px auto 0;
+    background: var(--white);
+    border-radius: 18px;
+    padding: 26px 22px;
+    box-shadow: 0 20px 40px rgba(36,57,31,0.1);
+  }
+
+  .result.show{ display:block; }
+
+  .result h2{
+    font-family: 'Shippori Mincho', serif;
+    font-size: 19px;
+    color: var(--paddy-green-deep);
+    margin-bottom: 10px;
+  }
+
+  .result p{ font-size: 13.5px; color: #6B6455; line-height: 1.6; }
+
+  .payment-box{
+    background: #FFF8E7;
+    border: 1.5px solid var(--rice-gold);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+  }
+
+  .payment-title{
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--rice-gold-deep);
+    margin-bottom: 6px;
+  }
+
+  .payment-desc{
+    font-size: 12.5px;
+    color: #4A4536;
+    line-height: 1.7;
+  }
+
+  .agree-row{
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--ink);
+    line-height: 1.6;
+    margin-bottom: 6px;
+    cursor: pointer;
+  }
+
+  .agree-row input{
+    accent-color: var(--paddy-green);
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .error-msg{ color: #B4472C; font-size: 12px; margin-top: 6px; display: none; }
+  .form-error{
+    display:none;
+    background: #FBEAE5;
+    color: #B4472C;
+    font-size: 13px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    margin-bottom: 18px;
+  }
+</style>
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body>
+
+<div class="hero">
+  <div class="eyebrow">RICE ORDER FORM</div>
+  <h1>お米のご注文<br>受け付けフォーム</h1>
+  <p>フルネーム・受け取り方法・希望量・ご要望をお伺いします。合計金額はご入力に応じて自動で表示されます。</p>
+</div>
+
+<form class="card" id="orderForm">
+
+  <div class="form-error" id="formError">送信に失敗しました。もう一度お試しください。</div>
+
+  <div class="field">
+    <label class="field-label">フルネーム<span class="req">必須</span></label>
+    <input type="text" id="fullname" placeholder="例:野尻 太郎">
+    <div class="error-msg" id="err-fullname">フルネームを入力してください</div>
+  </div>
+
+  <div class="field">
+    <label class="field-label">LINE表示名<span class="req">必須</span></label>
+    <input type="text" id="lineName" placeholder="例:のじたろう">
+    <div class="helper">LINEのトーク画面に表示されているお名前をご記入ください。注文の照合に使用します。</div>
+    <div class="error-msg" id="err-lineName">LINE表示名を入力してください</div>
+  </div>
+
+  <div class="field">
+    <label class="field-label">電話番号<span class="req">必須</span></label>
+    <input type="text" id="phone" placeholder="例:090-1234-5678">
+    <div class="error-msg" id="err-phone">電話番号を入力してください</div>
+  </div>
+
+  <div class="field">
+    <label class="field-label">受け取り方法<span class="req">必須</span></label>
+    <div class="method-group" id="methodGroup">
+      <label class="method-option" data-value="配送">
+        <input type="radio" name="method" value="配送">
+        <div>
+          <div class="m-title">配送(宅配便)</div>
+          <div class="m-desc">ご自宅までお届け・送料別途</div>
+        </div>
+      </label>
+      <label class="method-option" data-value="直接受け取り">
+        <input type="radio" name="method" value="直接受け取り">
+        <div>
+          <div class="m-title">直接受け取り</div>
+          <div class="m-desc">事務所にて手渡し(営業時間 7:00〜18:00)</div>
+        </div>
+      </label>
+    </div>
+    <div class="error-msg" id="err-method">受け取り方法を選択してください</div>
+  </div>
+
+  <div class="conditional" id="addressBlock">
+    <div class="field">
+      <label class="field-label">都道府県<span class="req">必須</span></label>
+      <select id="prefecture">
+        <option value="">選択してください</option>
+        <optgroup label="北海道">
+          <option>北海道</option>
+        </optgroup>
+        <optgroup label="北東北">
+          <option>青森県</option><option>岩手県</option><option>秋田県</option>
+        </optgroup>
+        <optgroup label="南東北">
+          <option>宮城県</option><option>山形県</option><option>福島県</option>
+        </optgroup>
+        <optgroup label="関東">
+          <option>茨城県</option><option>栃木県</option><option>群馬県</option><option>埼玉県</option><option>千葉県</option><option>東京都</option><option>神奈川県</option><option>山梨県</option>
+        </optgroup>
+        <optgroup label="信越">
+          <option>新潟県</option><option>長野県</option>
+        </optgroup>
+        <optgroup label="北陸">
+          <option>富山県</option><option>石川県</option><option>福井県</option>
+        </optgroup>
+        <optgroup label="東海">
+          <option>岐阜県</option><option>静岡県</option><option>愛知県</option><option>三重県</option>
+        </optgroup>
+        <optgroup label="関西">
+          <option>滋賀県</option><option>京都府</option><option>大阪府</option><option>兵庫県</option><option>奈良県</option><option>和歌山県</option>
+        </optgroup>
+        <optgroup label="中国">
+          <option>鳥取県</option><option>島根県</option><option>岡山県</option><option>広島県</option><option>山口県</option>
+        </optgroup>
+        <optgroup label="四国">
+          <option>徳島県</option><option>香川県</option><option>愛媛県</option><option>高知県</option>
+        </optgroup>
+        <optgroup label="北九州">
+          <option>福岡県</option><option>佐賀県</option><option>長崎県</option><option>大分県</option>
+        </optgroup>
+        <optgroup label="南九州">
+          <option>熊本県</option><option>宮崎県</option><option>鹿児島県</option>
+        </optgroup>
+        <optgroup label="沖縄(要問い合わせ)">
+          <option>沖縄県</option>
+        </optgroup>
+      </select>
+      <div class="error-msg" id="err-prefecture">都道府県を選択してください</div>
+    </div>
+    <div class="field">
+      <label class="field-label">郵便番号<span class="req">必須</span></label>
+      <input type="text" id="postalCode" placeholder="例:870-0000">
+      <div class="error-msg" id="err-postalCode">郵便番号を入力してください</div>
+    </div>
+    <div class="field" style="margin-bottom:0;">
+      <label class="field-label">住所<span class="req">必須</span></label>
+      <input type="text" id="address" placeholder="例:大分県〇〇市〇〇1-2-3">
+      <div class="helper" id="addressHelper"></div>
+      <div class="error-msg" id="err-address">住所を入力してください</div>
+    </div>
+  </div>
+
+  <div class="conditional" id="pickupBlock">
+    <div class="field" style="margin-bottom:0;">
+      <label class="field-label">受け取り希望日時<span class="req">必須</span></label>
+      <input type="text" id="pickupTime" placeholder="例:7月20日(月) 10:00">
+      <div class="helper">事務所の営業時間は7:00〜18:00です。この時間内でご希望の日時をご記入ください。受け取り場所は確定後にLINEでご案内します。</div>
+      <div class="error-msg" id="err-pickupTime">受け取り希望日時を入力してください</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="field">
+    <label class="field-label">お米の種類<span class="req">必須</span></label>
+    <div class="method-group" id="riceTypeGroup">
+      <label class="method-option" data-value="白米">
+        <input type="radio" name="riceType" value="白米">
+        <div>
+          <div class="m-title">白米</div>
+          <div class="m-desc">5kg単位でご注文いただけます(5kgあたり3,000円)</div>
+        </div>
+      </label>
+      <label class="method-option" data-value="玄米">
+        <input type="radio" name="riceType" value="玄米">
+        <div>
+          <div class="m-title">玄米</div>
+          <div class="m-desc">30kg単位でご注文いただけます(30kgあたり12,000円)</div>
+        </div>
+      </label>
+    </div>
+    <div class="error-msg" id="err-riceType">お米の種類を選択してください</div>
+  </div>
+
+  <div class="field">
+    <label class="field-label">希望量</label>
+    <div class="qty-row">
+      <button type="button" class="qty-btn" id="qtyMinus">−</button>
+      <div class="qty-display"><span id="qtyValue">5</span><span class="qty-unit"> kg</span></div>
+      <button type="button" class="qty-btn" id="qtyPlus">+</button>
+    </div>
+    <div class="helper" id="qtyHelper">お米の種類を選ぶと単位が決まります</div>
+  </div>
+
+  <!-- 金額表示エリア -->
+  <div class="price-box" id="priceBox">
+    <div class="price-row"><span>お米代</span><span id="riceAmountDisplay">-</span></div>
+    <div class="price-row"><span>送料</span><span id="shippingAmountDisplay">-</span></div>
+    <div class="price-row total"><span>合計金額</span><span id="totalAmountDisplay">-</span></div>
+    <div class="price-note" id="priceNote"></div>
+  </div>
+
+  <div class="payment-box">
+    <div class="payment-title">💳 お支払い方法</div>
+    <div class="payment-desc" id="paymentDesc">
+      受け取り方法を選択すると、お支払い方法が表示されます。
+    </div>
+  </div>
+
+  <div class="field" style="margin-bottom:14px;">
+    <label class="field-label">ご要望・お問い合わせ</label>
+    <textarea id="requests" placeholder="アレルギー、精米度合いのご希望などあればご記入ください"></textarea>
+  </div>
+
+  <label class="agree-row">
+    <input type="checkbox" id="agreePayment">
+    <span id="agreePaymentLabel">お支払い方法を確認しました<span class="req">必須</span></span>
+  </label>
+  <div class="error-msg" id="err-agreePayment">確認のチェックを入れてください</div>
+
+  <button type="submit" class="submit-btn" id="submitBtn" disabled>LINE情報を確認中...</button>
+</form>
+
+<div class="result" id="resultCard">
+  <h2>✓ ご注文ありがとうございます</h2>
+  <p>注文内容を受け付けました。内容確認後、LINEにてご連絡いたします。</p>
+</div>
+
+<script>
+  // ===== ここにApps ScriptのウェブアプリURLを入れてください =====
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwtovvk3fuJOH6-7GxiGnpwzS9RSTLlZ6V5hZb7bWwpdxpN_vRjqwgtVO3YPKI3cTn5/exec";
+
+  // ===== LIFF初期化(LINEユーザー情報の取得) =====
+  let lineUserId = null;
+
+  liff.init({ liffId: "2010691788-sbPNh5t5" })
+    .then(() => {
+      if (liff.isLoggedIn()) {
+        return liff.getProfile();
+      } else {
+        liff.login();
+      }
+    })
+    .then((profile) => {
+      if (!profile) return;
+      lineUserId = profile.userId;
+      const lineNameInput = document.getElementById('lineName');
+      if (lineNameInput && !lineNameInput.value) {
+        lineNameInput.value = profile.displayName || '';
+      }
+    })
+    .catch((err) => {
+      console.error('LIFF初期化エラー:', err);
+    })
+    .finally(() => {
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'この内容で注文する';
+    });
+  // ===== 料金マスタ(2025年契約書ベース/佐川急便 竹田営業所) =====
+  const RICE_UNIT_PRICE = {
+    '白米': { unitKg: 5, price: 3000 },
+    '玄米': { unitKg: 30, price: 12000 }
+  };
+
+  const PREFECTURE_REGION = {
+    '北海道': '北海道',
+    '青森県': '北東北', '岩手県': '北東北', '秋田県': '北東北',
+    '宮城県': '南東北', '山形県': '南東北', '福島県': '南東北',
+    '茨城県': '関東', '栃木県': '関東', '群馬県': '関東', '埼玉県': '関東', '千葉県': '関東', '東京都': '関東', '神奈川県': '関東', '山梨県': '関東',
+    '新潟県': '信越', '長野県': '信越',
+    '富山県': '北陸', '石川県': '北陸', '福井県': '北陸',
+    '岐阜県': '東海', '静岡県': '東海', '愛知県': '東海', '三重県': '東海',
+    '滋賀県': '関西', '京都府': '関西', '大阪府': '関西', '兵庫県': '関西', '奈良県': '関西', '和歌山県': '関西',
+    '鳥取県': '中国', '島根県': '中国', '岡山県': '中国', '広島県': '中国', '山口県': '中国',
+    '徳島県': '四国', '香川県': '四国', '愛媛県': '四国', '高知県': '四国',
+    '福岡県': '北九州', '佐賀県': '北九州', '長崎県': '北九州', '大分県': '北九州',
+    '熊本県': '南九州', '宮崎県': '南九州', '鹿児島県': '南九州'
+  };
+
+  // 契約書ベースの重量区分:2/5/10/20/30/50kg迄
+  const SHIPPING_TABLE = {
+    2:  { '南九州':580,'北九州':580,'四国':660,'中国':580,'関西':660,'北陸':740,'東海':740,'信越':900,'関東':900,'南東北':1060,'北東北':1060,'北海道':1380 },
+    5:  { '南九州':810,'北九州':810,'四国':890,'中国':810,'関西':890,'北陸':970,'東海':970,'信越':1130,'関東':1130,'南東北':1290,'北東北':1290,'北海道':1610 },
+    10: { '南九州':1010,'北九州':1010,'四国':1090,'中国':1010,'関西':1090,'北陸':1170,'東海':1170,'信越':1330,'関東':1330,'南東北':1490,'北東北':1490,'北海道':1810 },
+    20: { '南九州':1260,'北九州':1260,'四国':1340,'中国':1260,'関西':1340,'北陸':1420,'東海':1420,'信越':1580,'関東':1580,'南東北':1740,'北東北':1740,'北海道':2060 },
+    30: { '南九州':1460,'北九州':1460,'四国':1540,'中国':1460,'関西':1540,'北陸':1620,'東海':1620,'信越':1780,'関東':1780,'南東北':1940,'北東北':1940,'北海道':2260 },
+    50: { '南九州':5450,'北九州':5450,'四国':6000,'中国':5550,'関西':6350,'北陸':7350,'東海':7100,'信越':8500,'関東':8800,'南東北':10050,'北東北':11150,'北海道':14250 }
+  };
+
+  const BOX_TIERS = [2, 5, 10, 20, 30, 50];
+
+  // 合計重量を複数口に分けて、最安になる組み合わせを動的計画法で算出
+  function calcOptimalShippingCost(totalKg, region){
+    const dp = new Array(totalKg + 1).fill(Infinity);
+    dp[0] = 0;
+    for(let w = 1; w <= totalKg; w++){
+      for(const tier of BOX_TIERS){
+        const price = SHIPPING_TABLE[tier][region];
+        if(price === undefined) continue;
+        const prev = Math.max(0, w - tier);
+        if(dp[prev] + price < dp[w]){
+          dp[w] = dp[prev] + price;
+        }
+      }
+    }
+    return dp[totalKg];
+  }
+
+  const WEIGHT_TIERS = BOX_TIERS;
+
+  const yen = (n) => '¥' + n.toLocaleString('ja-JP');
+
+  function calcRiceAmount(riceType, qty){
+    const master = RICE_UNIT_PRICE[riceType];
+    if(!master) return 0;
+    return (qty / master.unitKg) * master.price;
+  }
+
+  function calcShippingAmount(method, prefecture, qty){
+    if(method === '直接受け取り') return { amount: 0, note: '' };
+    if(method !== '配送') return { amount: null, note: '' };
+    if(!prefecture) return { amount: null, note: '都道府県を選択すると送料が表示されます' };
+
+    const region = PREFECTURE_REGION[prefecture];
+    if(!region){
+      return { amount: null, note: '沖縄県への配送は送料を個別にご案内します。送信後にLINEでご連絡します。' };
+    }
+
+    const amount = calcOptimalShippingCost(qty, region);
+    let note = '';
+    if(qty > 50){
+      note = qty + 'kgのため複数口(箱)に分けて発送します。表示の送料は最適な組み合わせで自動計算した金額です。';
+    } else if(qty > 30){
+      note = '31kg以上のため、複数口に分けた方が安くなる場合は自動的にそちらの金額を表示しています。';
+    }
+    return { amount, note };
+  }
+
+  function updatePriceDisplay(){
+    const riceTypeInput = document.querySelector('input[name="riceType"]:checked');
+    const riceType = riceTypeInput ? riceTypeInput.value : null;
+    const methodInput = document.querySelector('input[name="method"]:checked');
+    const method = methodInput ? methodInput.value : null;
+    const prefecture = document.getElementById('prefecture').value;
+
+    const riceAmountEl = document.getElementById('riceAmountDisplay');
+    const shippingAmountEl = document.getElementById('shippingAmountDisplay');
+    const totalAmountEl = document.getElementById('totalAmountDisplay');
+    const noteEl = document.getElementById('priceNote');
+
+    let riceAmount = 0;
+    if(riceType){
+      riceAmount = calcRiceAmount(riceType, qty);
+      riceAmountEl.textContent = yen(riceAmount);
+    } else {
+      riceAmountEl.textContent = '-';
+    }
+
+    let shippingAmount = null;
+    let note = '';
+    if(method){
+      const result = calcShippingAmount(method, prefecture, qty);
+      shippingAmount = result.amount;
+      note = result.note;
+      shippingAmountEl.textContent = (shippingAmount === null) ? '未確定' : yen(shippingAmount);
+    } else {
+      shippingAmountEl.textContent = '-';
+    }
+
+    if(riceType && shippingAmount !== null){
+      totalAmountEl.textContent = yen(riceAmount + shippingAmount);
+    } else if (riceType && method === '配送' && shippingAmount === null) {
+      totalAmountEl.textContent = 'お米代 ' + yen(riceAmount) + ' + 送料別途';
+    } else {
+      totalAmountEl.textContent = '-';
+    }
+
+    noteEl.textContent = note;
+
+    window.__calculatedRiceAmount = riceAmount;
+    window.__calculatedShippingAmount = shippingAmount;
+  }
+
+  const methodGroup = document.getElementById('methodGroup');
+  const addressBlock = document.getElementById('addressBlock');
+  const pickupBlock = document.getElementById('pickupBlock');
+  const addressHelper = document.getElementById('addressHelper');
+  const riceTypeGroup = document.getElementById('riceTypeGroup');
+  const qtyHelper = document.getElementById('qtyHelper');
+  let qty = 5;
+  let qtyStep = 5;
+
+  riceTypeGroup.addEventListener('change', (e) => {
+    const value = e.target.value;
+    document.querySelectorAll('#riceTypeGroup .method-option').forEach(opt => {
+      opt.classList.toggle('selected', opt.dataset.value === value);
+    });
+
+    if(value === '玄米'){
+      qtyStep = 30;
+      qty = 30;
+      qtyHelper.textContent = '玄米は30kg単位でのご注文になります。';
+    } else {
+      qtyStep = 5;
+      qty = 5;
+      qtyHelper.textContent = '白米は5kg単位でのご注文になります。';
+    }
+    document.getElementById('qtyValue').textContent = qty;
+    updatePriceDisplay();
+  });
+
+  methodGroup.addEventListener('change', (e) => {
+    const value = e.target.value;
+    document.querySelectorAll('.method-option').forEach(opt => {
+      opt.classList.toggle('selected', opt.dataset.value === value);
+    });
+
+    addressBlock.classList.remove('open');
+    pickupBlock.classList.remove('open');
+
+    if(value === '配送'){
+      addressBlock.classList.add('open');
+      addressHelper.textContent = '宅配便でお届けします。送料は都道府県と重量によって変動します。';
+      document.getElementById('paymentDesc').innerHTML =
+        'お支払いは<strong>現金振込のみ</strong>となります(クレジットカード・代引き・その他決済には対応しておりません)。<br>' +
+        '振込用の請求書を<strong>お米と一緒に同封</strong>いたしますので、お荷物到着後、請求書に記載の口座へお振込みください。';
+      document.getElementById('agreePaymentLabel').innerHTML =
+        'お支払いは現金振込のみ(請求書はお米に同封)であることを確認しました<span class="req">必須</span>';
+    } else if(value === '直接受け取り'){
+      pickupBlock.classList.add('open');
+      document.getElementById('paymentDesc').innerHTML =
+        'お受け取り時に、<strong>その場での現金払い</strong>または<strong>振込</strong>のどちらかをお選びいただけます。<br>' +
+        '振込をご希望の場合は、その場で請求書をお渡しします。';
+      document.getElementById('agreePaymentLabel').innerHTML =
+        'お支払いは現金またはその場でのご案内による振込であることを確認しました<span class="req">必須</span>';
+    }
+    updatePriceDisplay();
+  });
+
+  document.getElementById('prefecture').addEventListener('change', updatePriceDisplay);
+
+  document.getElementById('qtyMinus').addEventListener('click', () => {
+    qty = Math.max(qtyStep, qty - qtyStep);
+    document.getElementById('qtyValue').textContent = qty;
+    updatePriceDisplay();
+  });
+  document.getElementById('qtyPlus').addEventListener('click', () => {
+    qty = qty + qtyStep;
+    document.getElementById('qtyValue').textContent = qty;
+    updatePriceDisplay();
+  });
+
+  document.getElementById('orderForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    let valid = true;
+
+    const fullname = document.getElementById('fullname').value.trim();
+    const lineName = document.getElementById('lineName').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const methodInput = document.querySelector('input[name="method"]:checked');
+    const method = methodInput ? methodInput.value : null;
+    const riceTypeInput = document.querySelector('input[name="riceType"]:checked');
+    const riceType = riceTypeInput ? riceTypeInput.value : null;
+    const address = document.getElementById('address').value.trim();
+    const postalCode = document.getElementById('postalCode').value.trim();
+    const prefecture = document.getElementById('prefecture').value;
+    const pickupTime = document.getElementById('pickupTime').value.trim();
+    const requests = document.getElementById('requests').value.trim();
+
+    document.getElementById('err-fullname').style.display = 'none';
+    document.getElementById('err-lineName').style.display = 'none';
+    document.getElementById('err-phone').style.display = 'none';
+    document.getElementById('err-method').style.display = 'none';
+    document.getElementById('err-address').style.display = 'none';
+    document.getElementById('err-postalCode').style.display = 'none';
+    document.getElementById('err-prefecture').style.display = 'none';
+    document.getElementById('err-pickupTime').style.display = 'none';
+    document.getElementById('err-riceType').style.display = 'none';
+    document.getElementById('err-agreePayment').style.display = 'none';
+    document.getElementById('formError').style.display = 'none';
+
+    if(!fullname){ document.getElementById('err-fullname').style.display = 'block'; valid = false; }
+    if(!lineName){ document.getElementById('err-lineName').style.display = 'block'; valid = false; }
+    if(!phone){ document.getElementById('err-phone').style.display = 'block'; valid = false; }
+    if(!method){ document.getElementById('err-method').style.display = 'block'; valid = false; }
+    if(method === '配送' && !address){
+      document.getElementById('err-address').style.display = 'block'; valid = false;
+    }
+    if(method === '配送' && !postalCode){
+      document.getElementById('err-postalCode').style.display = 'block'; valid = false;
+    }
+    if(method === '配送' && !prefecture){
+      document.getElementById('err-prefecture').style.display = 'block'; valid = false;
+    }
+    if(method === '直接受け取り' && !pickupTime){
+      document.getElementById('err-pickupTime').style.display = 'block'; valid = false;
+    }
+    if(!riceType){ document.getElementById('err-riceType').style.display = 'block'; valid = false; }
+    if(!document.getElementById('agreePayment').checked){
+      document.getElementById('err-agreePayment').style.display = 'block'; valid = false;
+    }
+
+    if(!valid) return;
+
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = '送信中...';
+
+    const riceAmount = window.__calculatedRiceAmount || 0;
+    const shippingAmount = window.__calculatedShippingAmount;
+    const totalAmount = (shippingAmount !== null) ? riceAmount + shippingAmount : null;
+
+    const payload = {
+      fullname: fullname,
+      lineName: lineName,
+      phone: phone,
+      method: method,
+      address: (method === '配送') ? address : '',
+      postalCode: (method === '配送') ? postalCode : '',
+      prefecture: (method === '配送') ? prefecture : '',
+      pickupTime: (method === '直接受け取り') ? pickupTime : '',
+      riceType: riceType,
+      qty: qty,
+      requests: requests,
+      riceAmount: riceAmount,
+      shippingAmount: shippingAmount,
+      totalAmount: totalAmount,
+      paymentMethod: (method === '配送') ? '現金振込(請求書同封)' : '現金またはその場振込',
+      paymentAgreed: true,
+      lineUserId: lineUserId
+    };
+
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // プリフライトを避けるためtext/plainで送る
+      body: JSON.stringify(payload)
+    })
+      .then(function(res){ return res.json(); })
+      .then(function(result){
+        if (result && result.success) {
+          document.getElementById('orderForm').style.display = 'none';
+          document.getElementById('resultCard').classList.add('show');
+          document.getElementById('resultCard').scrollIntoView({behavior:'smooth', block:'start'});
+        } else {
+          throw new Error(result && result.error ? result.error : '不明なエラー');
+        }
+      })
+      .catch(function(err){
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'この内容で注文する';
+        document.getElementById('formError').textContent = '送信エラー: ' + (err && err.message ? err.message : JSON.stringify(err));
+        document.getElementById('formError').style.display = 'block';
+        console.error(err);
+      });
+  });
+</script>
+
+</body>
+</html>

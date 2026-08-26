@@ -402,20 +402,41 @@
   <div class="divider"></div>
 
   <div class="field">
+    <label class="field-label">お米の年式<span class="req">必須</span></label>
+    <div class="method-group" id="harvestYearGroup">
+      <label class="method-option" data-value="新米">
+        <input type="radio" name="harvestYear" value="新米">
+        <div>
+          <div class="m-title">新米</div>
+          <div class="m-desc">今年収穫したお米です</div>
+        </div>
+      </label>
+      <label class="method-option" data-value="古米">
+        <input type="radio" name="harvestYear" value="古米">
+        <div>
+          <div class="m-title">古米(在庫米)</div>
+          <div class="m-desc">昨年以前に収穫したお米です</div>
+        </div>
+      </label>
+    </div>
+    <div class="error-msg" id="err-harvestYear">お米の年式を選択してください</div>
+  </div>
+
+  <div class="field">
     <label class="field-label">お米の種類<span class="req">必須</span></label>
     <div class="method-group" id="riceTypeGroup">
       <label class="method-option" data-value="白米">
         <input type="radio" name="riceType" value="白米">
         <div>
           <div class="m-title">白米</div>
-          <div class="m-desc">5kg単位でご注文いただけます(5kgあたり3,000円)</div>
+          <div class="m-desc" id="riceTypeDescWhite">5kg単位でご注文いただけます</div>
         </div>
       </label>
       <label class="method-option" data-value="玄米">
         <input type="radio" name="riceType" value="玄米">
         <div>
           <div class="m-title">玄米</div>
-          <div class="m-desc">30kg単位でご注文いただけます(30kgあたり12,000円)</div>
+          <div class="m-desc" id="riceTypeDescBrown">30kg単位でご注文いただけます</div>
         </div>
       </label>
     </div>
@@ -499,8 +520,14 @@
     });
   // ===== 料金マスタ(2025年契約書ベース/佐川急便 竹田営業所) =====
   const RICE_UNIT_PRICE = {
-    '白米': { unitKg: 5, price: 3000 },
-    '玄米': { unitKg: 30, price: 12000 }
+    '新米': {
+      '白米': { unitKg: 5, price: 3500 },
+      '玄米': { unitKg: 30, price: 13000 }
+    },
+    '古米': {
+      '白米': { unitKg: 5, price: 3000 },
+      '玄米': { unitKg: 30, price: 12000 }
+    }
   };
 
   const PREFECTURE_REGION = {
@@ -551,8 +578,10 @@
 
   const yen = (n) => '¥' + n.toLocaleString('ja-JP');
 
-  function calcRiceAmount(riceType, qty){
-    const master = RICE_UNIT_PRICE[riceType];
+  function calcRiceAmount(harvestYear, riceType, qty){
+    const yearMaster = RICE_UNIT_PRICE[harvestYear];
+    if(!yearMaster) return 0;
+    const master = yearMaster[riceType];
     if(!master) return 0;
     return (qty / master.unitKg) * master.price;
   }
@@ -578,6 +607,8 @@
   }
 
   function updatePriceDisplay(){
+    const harvestYearInput = document.querySelector('input[name="harvestYear"]:checked');
+    const harvestYear = harvestYearInput ? harvestYearInput.value : null;
     const riceTypeInput = document.querySelector('input[name="riceType"]:checked');
     const riceType = riceTypeInput ? riceTypeInput.value : null;
     const methodInput = document.querySelector('input[name="method"]:checked');
@@ -590,8 +621,8 @@
     const noteEl = document.getElementById('priceNote');
 
     let riceAmount = 0;
-    if(riceType){
-      riceAmount = calcRiceAmount(riceType, qty);
+    if(riceType && harvestYear){
+      riceAmount = calcRiceAmount(harvestYear, riceType, qty);
       riceAmountEl.textContent = yen(riceAmount);
     } else {
       riceAmountEl.textContent = '-';
@@ -626,10 +657,36 @@
   const addressBlock = document.getElementById('addressBlock');
   const pickupBlock = document.getElementById('pickupBlock');
   const addressHelper = document.getElementById('addressHelper');
+  const harvestYearGroup = document.getElementById('harvestYearGroup');
   const riceTypeGroup = document.getElementById('riceTypeGroup');
   const qtyHelper = document.getElementById('qtyHelper');
   let qty = 5;
   let qtyStep = 5;
+
+  function updateRiceTypeUnitPriceLabels(){
+    const harvestYearInput = document.querySelector('input[name="harvestYear"]:checked');
+    const harvestYear = harvestYearInput ? harvestYearInput.value : null;
+    const whiteDesc = document.getElementById('riceTypeDescWhite');
+    const brownDesc = document.getElementById('riceTypeDescBrown');
+    if(harvestYear && RICE_UNIT_PRICE[harvestYear]){
+      const white = RICE_UNIT_PRICE[harvestYear]['白米'];
+      const brown = RICE_UNIT_PRICE[harvestYear]['玄米'];
+      whiteDesc.textContent = white.unitKg + 'kg単位でご注文いただけます(' + white.unitKg + 'kgあたり' + yen(white.price) + ')';
+      brownDesc.textContent = brown.unitKg + 'kg単位でご注文いただけます(' + brown.unitKg + 'kgあたり' + yen(brown.price) + ')';
+    } else {
+      whiteDesc.textContent = '5kg単位でご注文いただけます';
+      brownDesc.textContent = '30kg単位でご注文いただけます';
+    }
+  }
+
+  harvestYearGroup.addEventListener('change', (e) => {
+    const value = e.target.value;
+    document.querySelectorAll('#harvestYearGroup .method-option').forEach(opt => {
+      opt.classList.toggle('selected', opt.dataset.value === value);
+    });
+    updateRiceTypeUnitPriceLabels();
+    updatePriceDisplay();
+  });
 
   riceTypeGroup.addEventListener('change', (e) => {
     const value = e.target.value;
@@ -700,6 +757,8 @@
     const phone = document.getElementById('phone').value.trim();
     const methodInput = document.querySelector('input[name="method"]:checked');
     const method = methodInput ? methodInput.value : null;
+    const harvestYearInput = document.querySelector('input[name="harvestYear"]:checked');
+    const harvestYear = harvestYearInput ? harvestYearInput.value : null;
     const riceTypeInput = document.querySelector('input[name="riceType"]:checked');
     const riceType = riceTypeInput ? riceTypeInput.value : null;
     const address = document.getElementById('address').value.trim();
@@ -716,6 +775,7 @@
     document.getElementById('err-postalCode').style.display = 'none';
     document.getElementById('err-prefecture').style.display = 'none';
     document.getElementById('err-pickupTime').style.display = 'none';
+    document.getElementById('err-harvestYear').style.display = 'none';
     document.getElementById('err-riceType').style.display = 'none';
     document.getElementById('err-agreePayment').style.display = 'none';
     document.getElementById('formError').style.display = 'none';
@@ -736,6 +796,7 @@
     if(method === '直接受け取り' && !pickupTime){
       document.getElementById('err-pickupTime').style.display = 'block'; valid = false;
     }
+    if(!harvestYear){ document.getElementById('err-harvestYear').style.display = 'block'; valid = false; }
     if(!riceType){ document.getElementById('err-riceType').style.display = 'block'; valid = false; }
     if(!document.getElementById('agreePayment').checked){
       document.getElementById('err-agreePayment').style.display = 'block'; valid = false;
@@ -760,6 +821,7 @@
       postalCode: (method === '配送') ? postalCode : '',
       prefecture: (method === '配送') ? prefecture : '',
       pickupTime: (method === '直接受け取り') ? pickupTime : '',
+      harvestYear: harvestYear,
       riceType: riceType,
       qty: qty,
       requests: requests,

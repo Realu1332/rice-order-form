@@ -121,6 +121,17 @@
     background: #F1F4EC;
   }
 
+  .method-option.locked{
+    cursor: not-allowed;
+    opacity: 0.55;
+    background: #F0EEE6;
+  }
+
+  .method-option.locked .m-desc{
+    color: #B4472C;
+    font-weight: 700;
+  }
+
   .method-option input{ accent-color: var(--paddy-green); width: 17px; height: 17px; }
   .method-option .m-title{ font-weight: 700; font-size: 14.5px; }
   .method-option .m-desc{ font-size: 12px; color: #6B6455; margin-top: 2px; }
@@ -401,19 +412,16 @@
 
   <div class="divider"></div>
 
-  <div class="field" id="harvestYearField" style="display:none;">
+  <div class="field" id="harvestYearField">
     <label class="field-label">お米の年式<span class="req">必須</span></label>
     <div class="method-group" id="harvestYearGroup">
-      <!-- 新米の販売再開時は、下のコメントを外してください -->
-      <!--
-      <label class="method-option" data-value="新米">
+      <label class="method-option" data-value="新米" id="newRiceOption">
         <input type="radio" name="harvestYear" value="新米">
         <div>
           <div class="m-title">新米</div>
-          <div class="m-desc">今年収穫したお米です</div>
+          <div class="m-desc" id="newRiceDesc">今年収穫したお米です</div>
         </div>
       </label>
-      -->
       <label class="method-option" data-value="古米">
         <input type="radio" name="harvestYear" value="古米">
         <div>
@@ -691,19 +699,41 @@
     updatePriceDisplay();
   });
 
-  // ===== 新米の販売再開まで、選択肢を「古米」固定にする一時対応 =====
-  // 新米の販売を再開する際は、この処理ブロックを削除し、
-  // 上のHTMLの新米コメントアウトを解除し、
-  // #harvestYearFieldのdisplay:noneも外してください。
-  (function setDefaultHarvestYearToOld(){
-    const oldRiceInput = document.querySelector('input[name="harvestYear"][value="古米"]');
-    if(oldRiceInput){
-      oldRiceInput.checked = true;
-      document.querySelectorAll('#harvestYearGroup .method-option').forEach(opt => {
-        opt.classList.toggle('selected', opt.dataset.value === '古米');
-      });
-      updateRiceTypeUnitPriceLabels();
+  // ===== 新米の販売開始日を過ぎるまでは「新米」を選べないようにする =====
+  // 新米の販売開始日。この日の0:00(日本時間)以降、新米が選択可能になります。
+  const NEW_RICE_AVAILABLE_FROM = new Date('2026-09-01T00:00:00+09:00');
+
+  (function controlNewRiceAvailability(){
+    const now = new Date();
+    const isNewRiceAvailable = now >= NEW_RICE_AVAILABLE_FROM;
+
+    const newRiceOption = document.getElementById('newRiceOption');
+    const newRiceInput = newRiceOption ? newRiceOption.querySelector('input[name="harvestYear"]') : null;
+    const newRiceDesc = document.getElementById('newRiceDesc');
+
+    if(!isNewRiceAvailable){
+      // まだ販売開始日前 → 新米は見えるが選べない状態にする
+      if(newRiceInput) newRiceInput.disabled = true;
+      if(newRiceOption) newRiceOption.classList.add('locked');
+      if(newRiceDesc){
+        const y = NEW_RICE_AVAILABLE_FROM.getFullYear();
+        const m = NEW_RICE_AVAILABLE_FROM.getMonth() + 1;
+        const d = NEW_RICE_AVAILABLE_FROM.getDate();
+        newRiceDesc.textContent = m + '月' + d + '日から選択可能になります';
+      }
+
+      // 選択肢が実質「古米」しかない状態なので、自動で選択しておく
+      const oldRiceInput = document.querySelector('input[name="harvestYear"][value="古米"]');
+      if(oldRiceInput){
+        oldRiceInput.checked = true;
+        document.querySelectorAll('#harvestYearGroup .method-option').forEach(opt => {
+          opt.classList.toggle('selected', opt.dataset.value === '古米');
+        });
+        updateRiceTypeUnitPriceLabels();
+      }
     }
+    // isNewRiceAvailableがtrueの場合は何もしない
+    // → 新米・古米どちらも通常通り選べる状態のまま
   })();
 
   riceTypeGroup.addEventListener('change', (e) => {

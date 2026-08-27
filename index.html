@@ -401,9 +401,11 @@
 
   <div class="divider"></div>
 
-  <div class="field">
+  <div class="field" id="harvestYearField" style="display:none;">
     <label class="field-label">お米の年式<span class="req">必須</span></label>
     <div class="method-group" id="harvestYearGroup">
+      <!-- 新米の販売再開時は、下のコメントを外してください -->
+      <!--
       <label class="method-option" data-value="新米">
         <input type="radio" name="harvestYear" value="新米">
         <div>
@@ -411,6 +413,7 @@
           <div class="m-desc">今年収穫したお米です</div>
         </div>
       </label>
+      -->
       <label class="method-option" data-value="古米">
         <input type="radio" name="harvestYear" value="古米">
         <div>
@@ -687,6 +690,21 @@
     updateRiceTypeUnitPriceLabels();
     updatePriceDisplay();
   });
+
+  // ===== 新米の販売再開まで、選択肢を「古米」固定にする一時対応 =====
+  // 新米の販売を再開する際は、この処理ブロックを削除し、
+  // 上のHTMLの新米コメントアウトを解除し、
+  // #harvestYearFieldのdisplay:noneも外してください。
+  (function setDefaultHarvestYearToOld(){
+    const oldRiceInput = document.querySelector('input[name="harvestYear"][value="古米"]');
+    if(oldRiceInput){
+      oldRiceInput.checked = true;
+      document.querySelectorAll('#harvestYearGroup .method-option').forEach(opt => {
+        opt.classList.toggle('selected', opt.dataset.value === '古米');
+      });
+      updateRiceTypeUnitPriceLabels();
+    }
+  })();
 
   riceTypeGroup.addEventListener('change', (e) => {
     const value = e.target.value;

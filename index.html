@@ -433,6 +433,33 @@
     <div class="error-msg" id="err-harvestYear">お米の年式を選択してください</div>
   </div>
 
+  <div class="conditional" id="varietyBlock">
+    <div class="field">
+      <label class="field-label">品種<span class="req">必須</span></label>
+      <div class="method-group" id="varietyGroup">
+        <label class="method-option" data-value="コシヒカリ">
+          <input type="radio" name="variety" value="コシヒカリ">
+          <div>
+            <div class="m-title">コシヒカリ</div>
+          </div>
+        </label>
+        <label class="method-option" data-value="ひとめぼれ">
+          <input type="radio" name="variety" value="ひとめぼれ">
+          <div>
+            <div class="m-title">ひとめぼれ</div>
+          </div>
+        </label>
+        <label class="method-option" data-value="つや姫">
+          <input type="radio" name="variety" value="つや姫">
+          <div>
+            <div class="m-title">つや姫</div>
+          </div>
+        </label>
+      </div>
+      <div class="error-msg" id="err-variety">品種を選択してください</div>
+    </div>
+  </div>
+
   <div class="field">
     <label class="field-label">お米の種類<span class="req">必須</span></label>
     <div class="method-group" id="riceTypeGroup">
@@ -669,6 +696,7 @@
   const pickupBlock = document.getElementById('pickupBlock');
   const addressHelper = document.getElementById('addressHelper');
   const harvestYearGroup = document.getElementById('harvestYearGroup');
+  const varietyBlock = document.getElementById('varietyBlock');
   const riceTypeGroup = document.getElementById('riceTypeGroup');
   const qtyHelper = document.getElementById('qtyHelper');
   let qty = 5;
@@ -695,8 +723,26 @@
     document.querySelectorAll('#harvestYearGroup .method-option').forEach(opt => {
       opt.classList.toggle('selected', opt.dataset.value === value);
     });
+
+    if(value === '新米'){
+      varietyBlock.classList.add('open');
+    } else {
+      varietyBlock.classList.remove('open');
+      // 古米に切り替えた場合、選択済みの品種はクリアしておく
+      document.querySelectorAll('input[name="variety"]').forEach(input => { input.checked = false; });
+      document.querySelectorAll('#varietyGroup .method-option').forEach(opt => { opt.classList.remove('selected'); });
+    }
+
     updateRiceTypeUnitPriceLabels();
     updatePriceDisplay();
+  });
+
+  const varietyGroup = document.getElementById('varietyGroup');
+  varietyGroup.addEventListener('change', (e) => {
+    const value = e.target.value;
+    document.querySelectorAll('#varietyGroup .method-option').forEach(opt => {
+      opt.classList.toggle('selected', opt.dataset.value === value);
+    });
   });
 
   // ===== 新米の販売開始日を過ぎるまでは「新米」を選べないようにする =====
@@ -807,6 +853,8 @@
     const method = methodInput ? methodInput.value : null;
     const harvestYearInput = document.querySelector('input[name="harvestYear"]:checked');
     const harvestYear = harvestYearInput ? harvestYearInput.value : null;
+    const varietyInput = document.querySelector('input[name="variety"]:checked');
+    const variety = varietyInput ? varietyInput.value : null;
     const riceTypeInput = document.querySelector('input[name="riceType"]:checked');
     const riceType = riceTypeInput ? riceTypeInput.value : null;
     const address = document.getElementById('address').value.trim();
@@ -824,6 +872,7 @@
     document.getElementById('err-prefecture').style.display = 'none';
     document.getElementById('err-pickupTime').style.display = 'none';
     document.getElementById('err-harvestYear').style.display = 'none';
+    document.getElementById('err-variety').style.display = 'none';
     document.getElementById('err-riceType').style.display = 'none';
     document.getElementById('err-agreePayment').style.display = 'none';
     document.getElementById('formError').style.display = 'none';
@@ -845,6 +894,7 @@
       document.getElementById('err-pickupTime').style.display = 'block'; valid = false;
     }
     if(!harvestYear){ document.getElementById('err-harvestYear').style.display = 'block'; valid = false; }
+    if(harvestYear === '新米' && !variety){ document.getElementById('err-variety').style.display = 'block'; valid = false; }
     if(!riceType){ document.getElementById('err-riceType').style.display = 'block'; valid = false; }
     if(!document.getElementById('agreePayment').checked){
       document.getElementById('err-agreePayment').style.display = 'block'; valid = false;
@@ -870,6 +920,7 @@
       prefecture: (method === '配送') ? prefecture : '',
       pickupTime: (method === '直接受け取り') ? pickupTime : '',
       harvestYear: harvestYear,
+      variety: (harvestYear === '新米') ? variety : '',
       riceType: riceType,
       qty: qty,
       requests: requests,
